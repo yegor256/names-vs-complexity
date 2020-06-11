@@ -1,0 +1,15 @@
+clones
+clones/
+repos.txt
+summary-*.csv
+article.pdf
+*.aux
+*.fdb_latexmk
+*.fls
+*.out
+*.vtc
+.DS_Store
+*.log
+*.bbl
+*.blg
+*.m
