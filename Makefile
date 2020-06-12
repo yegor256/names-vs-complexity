@@ -24,7 +24,6 @@ all: install search clone calc summary draw article
 
 install:
 	bundle update
-	gem install volatility
 
 clean:
 	rm -rf *.tex
@@ -33,66 +32,55 @@ clean:
 	rm -rf clones
 	cd paper; latexmk -c
 
-# search:
-# 	ruby find-repos.rb | tee repos.txt
+search:
+	ruby find-repos.rb | tee repos.txt
 
-# clone:
-# 	while read line; do \
-# 		p="clones/$${line}"; \
-# 		if [ -e "$${p}/.git" ]; then \
-# 			echo "$${p} already here"; \
-# 		else \
-# 			mkdir -p "$${p}"; \
-# 			git clone --depth=1 "https://github.com/$${line}" "$${p}"; \
-# 		fi \
-# 	done < repos.txt
+clone:
+	while read line; do \
+		p="clones/$${line}"; \
+		if [ -e "$${p}/.git" ]; then \
+			echo "$${p} already here"; \
+		else \
+			mkdir -p "$${p}"; \
+			git clone --depth=1 "https://github.com/$${line}" "$${p}"; \
+		fi \
+	done < repos.txt
 
-# uncalc:
-# 	find metrics -name 'scv.m' -exec rm \{} \;
-# 	find metrics -name 'scv*.m' -exec rm \{} \;
+uncalc:
+	rm -rf metrics
 
-# metrics=files bytes scv32 scv64 scv128
+calc:
+	mkdir -p metrics
+	for r in $$(find clones/ -type directory -depth 2); do \
+	  d="metrics/$${r/clones\/\//}"; \
+		if [ -e "$${d}" ]; then \
+		  echo "Dir with metrics already here: $${d}"; \
+		else \
+		  mkdir -p "$${d}"; \
+		  for f in $$(find $${r} -name '*.java'); do \
+		  	m="metrics/$${f/clones\/\//}.m"; \
+		  	mkdir -p $$(dirname "$${m}"); \
+				echo '1,1' > "$${m}"; \
+			done; \
+		  echo "$$(find $${d} -type file | wc -l) Java classes analyzed into $${d}"; \
+		fi; \
+	done
 
-# calc:
-# 	for f in $$(find clones/ -type directory -depth 2); do \
-# 	  f=$${f/clones\/\//}; \
-# 	  mkdir -p "metrics/$${f}"; \
-# 		p="metrics/$${f}/files.m"; \
-# 		if [ ! -e "$${p}" ]; then \
-# 			find "clones/$${f}" -type file -not -path '.git/*' | wc -l > "$${p}"; \
-# 		fi; \
-# 		p="metrics/$${f}/bytes.m"; \
-# 		if [ ! -e "$${p}" ]; then \
-# 			du -s -b "clones/$${f}" | awk '{ print $$1 }' > "$${p}"; \
-# 		fi; \
-# 		for z in 32 64 128; do \
-# 			p="metrics/$${f}/scv$${z}.m"; \
-# 			if [ ! -e "$${p}" ]; then \
-# 				/code/volatility/bin/volatility --sectors=$${z} --home="clones/$${f}" > "$${p}"; \
-# 			fi; \
-# 		done; \
-# 	done
+summary:
+	s="summary.csv"; \
+	rm -rf $${s}; \
+	touch $${s}; \
+	for f in $$(find metrics -name '*.m'); do \
+		cat "$${f}" >> $${s}; \
+	done; \
+	echo "$$(wc -l < $${s}) methods measured, the summary is in $${s}"; \
 
-# summary:
-# 	for i in ${metrics}; do \
-# 		s="summary-$${i}.csv"; \
-# 		rm -rf $${s}; \
-# 		touch $${s}; \
-# 		for f in $$(find metrics -name $${i}.m); do \
-# 			cat "$${f}" >> $${s}; \
-# 		done; \
-# 		echo "$$(wc -l < $${s}) repos measured $${i}, summary in $${s}"; \
-# 	done
+draw: summary.csv
+	ruby draw.rb --summary=summary.csv > paper/graph.tex
 
-# draw: summary-files.csv summary-bytes.csv
-# 	for z in 32 64 128; do \
-# 		ruby draw.rb --yaxis=summary-scv$${z}.csv --xaxis=summary-files.csv '--xlabel=log_{10}(M_1)' > paper/files-$${z}.tex; \
-# 		ruby draw.rb --yaxis=summary-scv$${z}.csv --xaxis=summary-bytes.csv '--xlabel=log_{10}(M_2)' > paper/bytes-$${z}.tex; \
-# 	done
+paper/total.tex:
+	rm -f paper/total.tex
+	echo "\\\def\\\thetotalrepos{$$(find metrics -name 'files.m' | wc -l)}" > paper/total.tex
 
-# metrics:
-# 	rm -f paper/total.tex
-# 	echo "\\\def\\\thetotalrepos{$$(find metrics -name 'files.m' | wc -l)}" > paper/total.tex
-
-article: paper/article.tex
+article: paper/article.tex paper/total.tex
 	cd paper; rm -f article.pdf; latexmk -pdf article

@@ -1,7 +1,7 @@
 clones
 clones/
 repos.txt
-summary-*.csv
+summary.csv
 article.pdf
 *.aux
 *.fdb_latexmk
