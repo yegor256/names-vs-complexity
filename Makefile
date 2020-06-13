@@ -24,6 +24,7 @@ all: install search clone calc summary draw article
 
 install:
 	bundle update
+	python3 -m pip install -r requirements.txt
 
 clean:
 	rm -rf *.tex
@@ -51,7 +52,7 @@ uncalc:
 
 calc:
 	mkdir -p metrics
-	for r in $$(find clones/ -type directory -depth 2); do \
+	for r in $$(find clones/ -type d -maxdepth 2 ); do \
 	  d="metrics/$${r/clones\/\//}"; \
 		if [ -e "$${d}" ]; then \
 		  echo "Dir with metrics already here: $${d}"; \
@@ -60,9 +61,12 @@ calc:
 		  for f in $$(find $${r} -name '*.java'); do \
 		  	m="metrics/$${f/clones\/\//}.m"; \
 		  	mkdir -p $$(dirname "$${m}"); \
-				echo '1,1' > "$${m}"; \
+				if [ ! -e "$${m}" ]; then \
+					python3 calc.py "$${f}"; \
+				fi \
+				# echo '1,1' > "$${m}"; \
 			done; \
-		  echo "$$(find $${d} -type file | wc -l) Java classes analyzed into $${d}"; \
+		  echo "$$(find $${d} -type f | wc -l) Java classes analyzed into $${d}"; \
 		fi; \
 	done
 
