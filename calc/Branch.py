@@ -4,16 +4,22 @@ class Branch:
     def __init__(self, node):
         self.node = node
 
-    def exists(self):
+    def count(self):
         if (isinstance(self.node, tree.BinaryOperation)):
-            return self.node.operator == '&&' or self.node.operator == '||'
+            if(self.node.operator == '&&' or self.node.operator == '||'):
+                return 1
 
-        return isinstance(self.node, (
+        if(isinstance(self.node, (
             tree.ForStatement,
             tree.IfStatement,
             tree.WhileStatement,
             tree.DoStatement,
-            tree.SwitchStatementCase,
             tree.TernaryExpression
-        ))
+        ))):
+            return 1
+
+        if(isinstance(self.node, tree.SwitchStatementCase)):
+            return len(self.node.case)
+
+        return 0
 

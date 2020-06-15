@@ -4,17 +4,17 @@ from unittest.mock import create_autospec, patch, Mock
 from Metric import Metric
 
 class Metric_Test(TestCase):
-    def test_metric_when_branches_exists(self):
+    def test_metric_when_branches_count(self):
         with patch('Metric.Branch') as MockClassBranch:
             MockBranch = MockClassBranch.return_value
-            MockBranch.exists.return_value = True
+            MockBranch.count.return_value = True
             code = 'nextKey = new BlockKey(serialNo, System.currentTimeMillis() + 3);'
             self.assertEqual(Metric(self.tree(code)).cc(), 10)
 
-    def test_metric_when_branches_not_exists(self):
+    def test_metric_when_branches_not_count(self):
         with patch('Metric.Branch') as MockClassBranch:
             MockBranch = MockClassBranch.return_value
-            MockBranch.exists.return_value = False
+            MockBranch.count.return_value = False
             code = 'nextKey = new BlockKey(serialNo, System.currentTimeMillis() + 3);'
             self.assertEqual(Metric(self.tree(code)).cc(), 1)
 

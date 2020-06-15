@@ -1,5 +1,5 @@
 from Branch import Branch
-from javalang.tree import ForStatement
+import javalang
 
 class Metric:
     num = 1
@@ -9,6 +9,5 @@ class Metric:
 
     def cc(self):
         for path, node in self.tree:
-            if (Branch(node).exists()):
-                self.num += 1
+            self.num += Branch(node).count()
         return self.num;

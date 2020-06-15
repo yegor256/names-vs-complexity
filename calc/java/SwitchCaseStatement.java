@@ -1,5 +1,5 @@
 class SwitchCaseStatement {
-  public int cc = 3;
+  public int cc = 4;
 
   void foo( int a ) {
     switch ( a )
