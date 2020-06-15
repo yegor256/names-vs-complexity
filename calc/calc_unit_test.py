@@ -1,8 +1,19 @@
+import os
+import sys
+import unittest
 import javalang
-from unittest import TestCase
-from Branch import Branch
 
-class Branch_Test(TestCase):
+try:
+    from unittest.mock import patch
+except ImportError:
+    from mock import patch
+
+fileDir = os.path.dirname(os.path.realpath('__file__'))
+testargs = ["", os.path.join(fileDir, 'java/cc/SwitchCaseStatement.java')]
+with patch.object(sys, 'argv', testargs):
+    from calc import branches
+
+class TestCalc(unittest.TestCase):
     def test_for_statement_count(self):
         code = """
             for (int i = 0; i < amounts.length; i++) {
@@ -10,12 +21,12 @@ class Branch_Test(TestCase):
             }
         """
         node = self.statement(code)
-        self.assertEqual(Branch(node).count(), 1)
+        self.assertEqual(branches(node), 1)
 
     def test_branch_not_count(self):
         code = "nextKey = new BlockKey(serialNo, System.currentTimeMillis() + 3.0);"
         node = self.expression(code)
-        self.assertEqual(Branch(node).count(), 0)
+        self.assertEqual(branches(node), 0)
 
     def test_if_statement_count(self):
         code = """
@@ -24,7 +35,7 @@ class Branch_Test(TestCase):
             }
         """
         node = self.statement(code)
-        self.assertEqual(Branch(node).count(), 1)
+        self.assertEqual(branches(node), 1)
 
     def test_while_statement_count(self):
         code = """
@@ -34,7 +45,7 @@ class Branch_Test(TestCase):
             }
         """
         node = self.statement(code)
-        self.assertEqual(Branch(node).count(), 1)
+        self.assertEqual(branches(node), 1)
 
     def test_do_statement_count(self):
         code = """
@@ -43,7 +54,7 @@ class Branch_Test(TestCase):
             while ( a );
         """
         node = self.statement(code)
-        self.assertEqual(Branch(node).count(), 1)
+        self.assertEqual(branches(node), 1)
 
     def test_switch_statement_count(self):
         code = """
@@ -54,27 +65,27 @@ class Branch_Test(TestCase):
             }
         """
         node = self.statement(code)
-        self.assertEqual(Branch(node.cases[0]).count(), 1)
+        self.assertEqual(branches(node.cases[0]), 1)
 
     def test_logic_and_operator_count(self):
         code = 'if ( a && b ) {}'
         ifNode = self.statement(code)
-        self.assertEqual(Branch(ifNode.children[1]).count(), 1)
+        self.assertEqual(branches(ifNode.children[1]), 1)
 
     def test_logic_or_operator_count(self):
         code = 'if ( a || b ) {}'
         ifNode = self.statement(code)
-        self.assertEqual(Branch(ifNode.children[1]).count(), 1)
+        self.assertEqual(branches(ifNode.children[1]), 1)
 
     def test_logic_operator_not_count(self):
         code = 'if ( a > b ) {}'
         ifNode = self.statement(code)
-        self.assertEqual(Branch(ifNode.children[1]).count(), 0)
+        self.assertEqual(branches(ifNode.children[1]), 0)
 
     def test_ternary_operator(self):
         code = 'value == "uppercase" ? "JOHN" : "john";'
         node = self.expression(code);
-        self.assertEqual(Branch(node).count(), 1)
+        self.assertEqual(branches(node), 1)
 
     def expression(self, code):
         return self.parser(code).parse_expression()
@@ -87,3 +98,5 @@ class Branch_Test(TestCase):
             javalang.tokenizer.tokenize(code)
         )
 
+if __name__ == '__main__':
+    unittest.main()

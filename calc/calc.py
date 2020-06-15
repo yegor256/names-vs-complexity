@@ -21,27 +21,34 @@
 # SOFTWARE.
 
 import sys
-import javalang
+from javalang import tree, parse
 
-def ncss(tree):
-    metric = 0
-    print(tree.types[0].body[0])
-    return
-    print('node_type list\n')
-    for path, node in tree:
-        node_type = str(type(node))
-        if 'IfStatement' in node_type:
-            metric += 1
-        elif 'VariableDeclarator' in node_type:
-            print(str(node.initializer.value));
-    return metric
+def branches(node):
+    if (isinstance(node, tree.BinaryOperation)):
+        if(node.operator == '&&' or node.operator == '||'):
+            return 1
+
+    if(isinstance(node, (
+        tree.ForStatement,
+        tree.IfStatement,
+        tree.WhileStatement,
+        tree.DoStatement,
+        tree.TernaryExpression
+    ))):
+        return 1
+
+    if(isinstance(node, tree.SwitchStatementCase)):
+        return len(node.case)
+
+    return 0
+
 
 java = sys.argv[1]
 with open(java, encoding='utf-8') as f:
     try:
-        raw = javalang.parse.parse(f.read())
-        # tree = raw.filter(javalang.tree.ClassDeclaration)
-        ncss(raw)
-        # print(str(ncss(raw))
+        cc = 1
+        ast = parse.parse(f.read())
+        for path, node in ast:
+            cc += branches(node)
     except Exception as e:
         sys.exit(str(e) + ': ' + java)
