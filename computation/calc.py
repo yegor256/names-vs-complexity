@@ -21,34 +21,57 @@
 # SOFTWARE.
 
 import sys
+import re
 from javalang import tree, parse
 
+"""Determines the number of branches for a node
+according to the Extended Cyclomatic Complexity metric.
+Binary operations (&&, ||) and each case statement are taken into account.
+
+:param node: class provided by the parser and targeted to Java 8 spec
+:returns: number
+"""
 def branches(node):
+    count = 0
     if (isinstance(node, tree.BinaryOperation)):
         if(node.operator == '&&' or node.operator == '||'):
-            return 1
-
-    if(isinstance(node, (
+            count = 1
+    elif(isinstance(node, (
         tree.ForStatement,
         tree.IfStatement,
         tree.WhileStatement,
         tree.DoStatement,
         tree.TernaryExpression
     ))):
-        return 1
+        count = 1
+    elif(isinstance(node, tree.SwitchStatementCase)):
+        count = len(node.case)
+    elif(isinstance(node, tree.TryStatement)):
+        count = len(node.catches)
+    return count
 
-    if(isinstance(node, tree.SwitchStatementCase)):
-        return len(node.case)
+"""Check the name for compound inside the methods (i.e. for local variables)
 
-    return 0
+:param node: class provided by the parser and targeted to Java 8 spec
+:returns: boolean
+"""
+def compound(node):
+    flag = False
+    if (isinstance(node, tree.LocalVariableDeclaration)):
+        name = node.declarators[0].name
+        flag = len(re.findall(r'(?:[a-z][A-Z]+)|(?:[_])', name)) != 0
+    return flag
 
 
 java = sys.argv[1]
 with open(java, encoding='utf-8') as f:
     try:
         cc = 1
+        names = 0
         ast = parse.parse(f.read())
         for path, node in ast:
             cc += branches(node)
+            names += int(compound(node))
+        print(str(cc) + ',' +  str(names))
     except Exception as e:
         sys.exit(str(e) + ': ' + java)

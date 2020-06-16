@@ -11,7 +11,7 @@ except ImportError:
 fileDir = os.path.dirname(os.path.realpath('__file__'))
 testargs = ["", os.path.join(fileDir, 'java/cc/SwitchCaseStatement.java')]
 with patch.object(sys, 'argv', testargs):
-    from calc import branches
+    from calc import branches, compound
 
 class TestCalc(unittest.TestCase):
     def test_for_statement_count(self):
@@ -86,6 +86,35 @@ class TestCalc(unittest.TestCase):
         code = 'value == "uppercase" ? "JOHN" : "john";'
         node = self.expression(code);
         self.assertEqual(branches(node), 1)
+
+    def test_catch_statements(self):
+        code = """
+            try {
+                Throwable t = new Exception();
+                throw t;
+            } catch (RuntimeException e) {
+                System.err.println("catch RuntimeException");
+            } catch (Exception e) {
+                System.err.println("catch Exception");
+            } catch (Throwable e) {
+                System.err.println("catch Throwable");
+            }
+            System.err.println("next statement");
+        """
+        node = self.statement(code)
+        self.assertEqual(branches(node), 3)
+
+    def test_compound_with_camel_and_snake_cases(self):
+        for s in ['camelCase', 'CamelCase', 'camelCASE', 'snake_case', 'snake_CASE', 'SNAKE_CASE', 'SNAKE_case']:
+            code = "int %s = 0;" % (s)
+            node = self.parser(code).parse_local_variable_declaration_statement()
+            self.assertEqual(compound(node), 1)
+
+    def test_compound_without_camel_and_snake_cases(self):
+        for s in ['camelcase, CAMELCASE, Camelcase']:
+            code = "int %s = 0;" % (s)
+            node = self.parser(code).parse_local_variable_declaration_statement()
+            self.assertEqual(compound(node), 0)
 
     def expression(self, code):
         return self.parser(code).parse_expression()

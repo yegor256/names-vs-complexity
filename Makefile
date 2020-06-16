@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+SHELL := /bin/bash
 all: install search clone calc summary draw article
 
 install:
@@ -62,9 +63,8 @@ calc:
 		  	m="metrics/$${f/clones\/\//}.m"; \
 		  	mkdir -p $$(dirname "$${m}"); \
 				if [ ! -e "$${m}" ]; then \
-					python3 calc.py "$${f}"; \
+					python3 computation/calc.py "$${f}" > "$${m}"; \
 				fi \
-				# echo '1,1' > "$${m}"; \
 			done; \
 		  echo "$$(find $${d} -type f | wc -l) Java classes analyzed into $${d}"; \
 		fi; \
