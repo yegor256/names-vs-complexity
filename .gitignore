@@ -13,3 +13,4 @@ article.pdf
 *.bbl
 *.blg
 *.m
+__pycache__/
