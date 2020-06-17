@@ -107,14 +107,14 @@ class TestCalc(unittest.TestCase):
     def test_compound_with_camel_and_snake_cases(self):
         for s in ['camelCase', 'CamelCase', 'camelCASE', 'snake_case', 'snake_CASE', 'SNAKE_CASE', 'SNAKE_case']:
             code = "int %s = 0;" % (s)
-            node = self.parser(code).parse_local_variable_declaration_statement()
-            self.assertEqual(compound(node), 1)
+            node = self.parser(code).parse_method_or_field_declaraction()
+            self.assertEqual(compound(node.declarators[0]), 1)
 
     def test_compound_without_camel_and_snake_cases(self):
         for s in ['camelcase, CAMELCASE, Camelcase']:
             code = "int %s = 0;" % (s)
-            node = self.parser(code).parse_local_variable_declaration_statement()
-            self.assertEqual(compound(node), 0)
+            node = self.parser(code).parse_method_or_field_declaraction()
+            self.assertEqual(compound(node.declarators[0]), 0)
 
     def expression(self, code):
         return self.parser(code).parse_expression()
