@@ -22,6 +22,7 @@
 # SOFTWARE.
 
 require 'slop'
+require 'csv'
 
 opts = Slop.parse(ARGV, strict: true, help: true) do |o|
   o.integer '--width', default: 9
@@ -33,7 +34,11 @@ end
 
 points = []
 
-# Load CSV from summary
+CSV.read(opts[:summary]).each do |r|
+  points << { x: r[0], y: r[1] }
+end
+
+points = points.uniq
 
 ymax = points.map { |p| p[:y] }.max
 xmax = points.map { |p| p[:x] }.max
