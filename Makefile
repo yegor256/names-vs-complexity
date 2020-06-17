@@ -51,6 +51,10 @@ clone:
 uncalc:
 	rm -rf metrics
 
+calc_test:
+	python3 computation/calc_unit_test.py
+	python3 computation/calc_integration_test.py
+
 calc:
 	mkdir -p metrics
 	for r in $$(find clones/ -type d -maxdepth 2 ); do \

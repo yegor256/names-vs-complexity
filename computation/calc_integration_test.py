@@ -10,7 +10,7 @@ try:
 except ImportError:
     from mock import patch
 
-fileDir = os.path.dirname(os.path.realpath('__file__'))
+fileDir = os.path.dirname(os.path.realpath(__file__))
 testargs = ["", os.path.join(fileDir, 'java/cc/SwitchCaseStatement.java')]
 with patch.object(sys, 'argv', testargs):
     from calc import branches, compound
@@ -25,7 +25,7 @@ def names(ast):
     comment = next(ast.filter(javalang.tree.Documented))[1]
     return int(re.search(r'[\d]+', comment.documentation).group(0))
 
-for java in glob('java/names/*.java'):
+for java in glob(os.path.join(fileDir, 'java/names/*.java')):
     with open(java, encoding='utf-8') as f:
         try:
             ast = javalang.parse.parse(f.read())
@@ -36,11 +36,11 @@ for java in glob('java/names/*.java'):
                 receivedNames += compound(node)
 
             if (receivedNames != expectedNames):
-                raise Exception('\nTest failed. Expected ' + str(expectedNames) + ', receivedNames ' + str(receivedNames))
+                raise Exception('\nTest failed. Expected ' + str(expectedNames) + ', received ' + str(receivedNames))
         except Exception as e:
             sys.exit(str(e) + ': ' + java)
 
-for java in glob('java/cc/*.java'):
+for java in glob(os.path.join(fileDir, 'java/cc/*.java')):
     with open(java, encoding='utf-8') as f:
         try:
             ast = javalang.parse.parse(f.read())
@@ -51,11 +51,11 @@ for java in glob('java/cc/*.java'):
                 receivedCC += branches(node)
 
             if (receivedCC != expectedCC):
-                raise Exception('\nTest failed. Expected ' + str(expectedCC) + ', receivedCC ' + str(receivedCC))
+                raise Exception('\nTest failed. Expected ' + str(expectedCC) + ', received ' + str(receivedCC))
 
             print('.', end='', flush=True),
         except Exception as e:
             sys.exit(str(e) + ': ' + java)
 
-print(' OK')
+print('\nOK')
 

@@ -8,7 +8,7 @@ try:
 except ImportError:
     from mock import patch
 
-fileDir = os.path.dirname(os.path.realpath('__file__'))
+fileDir = os.path.dirname(os.path.realpath(__file__))
 testargs = ["", os.path.join(fileDir, 'java/cc/SwitchCaseStatement.java')]
 with patch.object(sys, 'argv', testargs):
     from calc import branches, compound
