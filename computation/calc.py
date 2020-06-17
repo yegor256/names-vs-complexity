@@ -45,9 +45,11 @@ def branches(node):
     ))):
         count = 1
     elif(isinstance(node, tree.SwitchStatementCase)):
-        count = len(node.case)
+        if node.case is not None:
+            count = len(node.case)
     elif(isinstance(node, tree.TryStatement)):
-        count = len(node.catches)
+        if node.catches is not None:
+            count = len(node.catches)
     return count
 
 """Check the name for compound inside the methods (i.e. for local variables)
@@ -57,9 +59,10 @@ def branches(node):
 """
 def compound(node):
     flag = False
-    if (isinstance(node, tree.LocalVariableDeclaration)):
-        name = node.declarators[0].name
-        flag = len(re.findall(r'(?:[a-z][A-Z]+)|(?:[_])', name)) != 0
+    if (isinstance(node, tree.VariableDeclarator)):
+        found = re.findall(r'(?:[a-z][A-Z]+)|(?:[_])', node.name)
+        if found is not None:
+            flag = len(found) != 0
     return flag
 
 
